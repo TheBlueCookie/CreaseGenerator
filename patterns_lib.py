@@ -91,7 +91,6 @@ class MiuraOriFold(Pattern):
             self.cell_width = self.paper_size[0] / self.n_cells_x
 
         self.unit_cell = MiuraOriUnitCell(fold_angle=fold_angle, x_len=self.cell_width, y_len=0.5 * self.cell_height)
-        self.paper_size = paper_size
         super().__init__(unit_cell=self.unit_cell, n_unit_cells=int(self.n_cells_x * self.n_cells_y))
 
     def generate_pattern_from_unit_cell(self):
@@ -123,7 +122,8 @@ class MiuraOriFold(Pattern):
 
         return fig, ax
 
-    def export_svg(self):
+    def export(self, format: str = 'pdf'):
+        assert format.lower() in ['pdf', 'svg'], "Choose file ending from 'svg' and 'pdf'!"
         fig, ax = self.plot_pattern()
 
         ax.axis('off')
@@ -136,12 +136,12 @@ class MiuraOriFold(Pattern):
         fig.set_size_inches(self.paper_size[0] / 25.4, self.paper_size[1] / 25.4)
 
         save_name = f"miuri_ori-fold_angle_{self.deg_angle}-{self.n_cells_x}_rows-{self.n_cells_y}_" \
-                   f"columns_paper_size_{self.paper_size[0]:.0f}-{self.paper_size[1]:.0f}.pdf"
+                    f"columns_paper_size_{self.paper_size[0]:.0f}x{self.paper_size[1]:.0f}mm.{format.lower()}"
 
         if not os.path.isdir(self.save_dir):
             os.mkdir(self.save_dir)
 
-        fig.savefig(os.path.join(self.save_dir, save_name), format='pdf', bbox_inches="tight", pad_inches=0)
+        fig.savefig(os.path.join(self.save_dir, save_name), format=format.lower(), bbox_inches="tight", pad_inches=0)
         print(f'Saved to {save_name}')
 
         return fig, ax
