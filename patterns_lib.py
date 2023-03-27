@@ -94,7 +94,7 @@ class MiuraOriFold(Pattern):
         super().__init__(unit_cell=self.unit_cell, n_unit_cells=int(self.n_cells_x * self.n_cells_y))
 
     def generate_pattern_from_unit_cell(self):
-        x_coords = np.array([i * self.unit_cell.x_len for i in range(self.n_cells_x + 1)])
+        x_coords = np.array([i * self.unit_cell.x_len for i in range(self.n_cells_x + 2)])
         y_coords = np.array([i * self.cell_height for i in range(self.n_cells_y)])
         origins = np.array(np.meshgrid(x_coords, y_coords)).T.reshape(-1, 2)
 
