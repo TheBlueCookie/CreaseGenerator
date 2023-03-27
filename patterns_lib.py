@@ -133,6 +133,8 @@ class MiuraOriFold(Pattern):
         ax.xaxis.set_major_locator(plt.NullLocator())
         ax.yaxis.set_major_locator(plt.NullLocator())
 
+        fig.set_size_inches(self.paper_size[0] / 25.4, self.paper_size[1] / 25.4)
+
         save_name = f"miuri_ori-fold_angle_{self.deg_angle}-{self.n_cells_x}_rows-{self.n_cells_y}_" \
                    f"columns_paper_size_{self.paper_size[0]:.0f}-{self.paper_size[1]:.0f}.pdf"
 

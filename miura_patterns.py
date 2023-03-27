@@ -5,8 +5,9 @@ from patterns_lib import MiuraOriFold
 
 # paper size in mm
 din_a4 = np.array([210, 297])
+din_a3 = np.array([297, 420])
 
-paper_size = din_a4
+paper_size = din_a3
 cells_per_row = 3
 cells_per_column = 4
 
