@@ -85,6 +85,7 @@ class MiuraOriFold(Pattern):
         self.n_cells_y = n_cells_y
         self.paper_size = paper_size
         self.cell_height = self.paper_size[1] / self.n_cells_y
+        self.continuous_pattern = None
         if fit_end_vertex:
             self.cell_width = (self.paper_size[0] - 0.5 * np.cos(fold_angle) * self.cell_height) / self.n_cells_x
         else:
@@ -106,13 +107,36 @@ class MiuraOriFold(Pattern):
             self.cells.append(MiuraOriUnitCell(fold_angle=self.unit_cell.fold_angle, x_len=self.unit_cell.x_len,
                                                y_len=self.unit_cell.y_len, origin=origin, bottom_cell=bottom_cell))
 
-    def plot_pattern(self, **kwargs):
+    def generate_continuous_pattern(self):
+        horizontal_lines = np.array([[[0, self.paper_size[0]], [i * self.cell_height / 2, i * self.cell_height / 2]] for i in range(1, self.n_cells_y * 2)])
+        n_vertical_lines = int(self.n_cells_x + 1)
+        n_points_per_line = int(self.n_cells_y * 2 + 1)
+        vertical_lines = np.zeros((n_vertical_lines, 2, n_points_per_line))
+
+        for i, _ in enumerate(vertical_lines):
+            vertical_lines[i, 0, :] = np.array([(np.mod((k-1), 2) * self.unit_cell.center_vertex_offset) for k in range(int(n_points_per_line))]) + i * self.cell_width
+            vertical_lines[i, 1, :] = np.array([k * self.cell_height / 2 for k in range(n_points_per_line)])
+
+        self.continuous_pattern = [horizontal_lines, vertical_lines]
+
+    def plot_pattern(self, pattern_type: str = 'continuous', **kwargs):
+        assert pattern_type.lower() in ['continuous', 'cells'], "Choose pattern type from 'continuous' and 'cells'!"
         ratio = self.paper_size[0] / self.paper_size[1]
         fig, ax = plt.subplots(figsize=(5 * ratio, 5))
 
-        for cell in self.cells:
-            for start, end in cell.cell:
-                ax.plot([start[0], end[0]], [start[1], end[1]], color='k', **kwargs)
+        if pattern_type == 'cells':
+            self.generate_pattern_from_unit_cell()
+            for cell in self.cells:
+                for start, end in cell.cell:
+                    ax.plot([start[0], end[0]], [start[1], end[1]], color='k', **kwargs)
+
+        elif pattern_type == 'continuous':
+            self.generate_continuous_pattern()
+            for h_line in self.continuous_pattern[0]:
+                ax.plot(h_line[0], h_line[1], color='k', **kwargs)
+
+            for v_line in self.continuous_pattern[1]:
+                ax.plot(v_line[0], v_line[1], color='k', **kwargs)
 
         ax.set_xlim(0, self.paper_size[0])
         ax.set_ylim(0, self.paper_size[1])
@@ -122,9 +146,11 @@ class MiuraOriFold(Pattern):
 
         return fig, ax
 
-    def export(self, format: str = 'pdf'):
+    def export(self, format: str = 'pdf', pattern_type: str = 'continuous'):
         assert format.lower() in ['pdf', 'svg'], "Choose file ending from 'svg' and 'pdf'!"
-        fig, ax = self.plot_pattern()
+        assert pattern_type.lower() in ['continuous', 'cells'], "Choose pattern type from 'continuous' and 'cells'!"
+
+        fig, ax = self.plot_pattern(pattern_type=pattern_type)
 
         ax.axis('off')
         ax.margins(0, 0)
